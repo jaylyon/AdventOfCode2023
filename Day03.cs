@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices.JavaScript;
-using System.Text;
-using System.Threading.Tasks;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace AOC2023
 {
@@ -151,107 +145,71 @@ namespace AOC2023
 ......231......%....................604.725......*.=710.=.............*....974.329..............*.........*....747..........600.............
 ..............688...869.........15............222.....................366....................120.10....539........................934.97....";
 
-        private const string sample = @"467..114..
-...*......
-..35..633.
-......#...
-617*......
-.....+.58.
-..592.....
-......755.
-...$.*....
-.664.598..";
-
         private readonly char[][] data = input.Split(Environment.NewLine).Select(l => l.ToArray()).ToArray();
 
         public int Part1()
         {
             int answer = 0;
-            var re = new Regex("\\d*");
+            var re = new Regex(@"\d+");
             int y = 0;
             foreach (var line in input.Split(Environment.NewLine))
             {
                 foreach (Match match in re.Matches(line))
                 {
-                    string number = match.Value;
-                    if (int.TryParse(number, out int result))
+                    numbers.Add(new number
                     {
-                        var n = new number
-                        {
-                            value = result,
-                            y = y,
-                            x = match.Index
-                        };
-                        numbers.Add(n);
+                        value = int.Parse(match.Value),
+                        y = y,
+                        x = match.Index
+                    });
 
-                        bool foundASymbol = false;
-                        for (int i = -1; i <= 1; i++)
+                    for (var i = -1; i <= 1; i++)
+                    {
+                        for (var j = -1; j <= match.Value.Length; j++)
                         {
-                            for (int j = -1; j <= number.Length; j++)
-                            {
-                                if (isInBounds(match.Index + j, y + i))
-                                {
-                                    if (IsSymbol(data[y + i][match.Index + j]))
-                                    {
-                                        answer += int.Parse(number);
-                                        foundASymbol = true;
-                                    }
-                                    if (foundASymbol) break;
-                                }
-                                if (foundASymbol) break;
-                            }
-                            if (foundASymbol) break;
+                            if (isInBounds(match.Index + j, y + i) && IsSymbol(data[y + i][match.Index + j]))
+                                answer += int.Parse(match.Value);
                         }
                     }
                 }
                 y++;
             }
-
             return answer;
         }
 
-        public Int64 Part2()
+        public int Part2()
         {
-            Int64 answer = 0;
-            var re = new Regex("\\*");
+            int ans = 0;
+            var re = new Regex("\\*", RegexOptions.Compiled);
             int y = 0;
             foreach (var line in input.Split(Environment.NewLine))
             {
                 foreach (Match match in re.Matches(line))
                 {
-                    if (match.Value == "*")
+                    List<number> nums = new();
+                    if (y > 0)
                     {
-                        List<number> adjacentNumbers = new();
-                        if (y > 0)
-                        {
-                            adjacentNumbers.AddRange(numbers.Where(n =>
-                                    n.y == y - 1
-                                    && n.x + n.value.ToString().Length > match.Index - 1
-                                    && n.x <= match.Index + 1));
-                        }
-                        
-                        adjacentNumbers.AddRange(numbers.Where(n => n.y == y && ( n.x + n.value.ToString().Length == match.Index || n.x == match.Index + 1)));
-                        
-                        if (y < data.Length)
-                        {
-                            adjacentNumbers.AddRange(numbers.Where(n =>
-                                n.y == y + 1 
-                                && n.x + n.value.ToString().Length > match.Index - 1 
+                        nums.AddRange(numbers.Where(n =>
+                                n.y == y - 1
+                                && n.x + n.value.ToString().Length > match.Index - 1
                                 && n.x <= match.Index + 1));
-                        }
-                        
-                        Console.WriteLine($"[{match.Index}, {y}] is adjacent to {string.Join(',',adjacentNumbers.Select(n => n.value))}");
-
-                        if (adjacentNumbers.Count == 2)
-                        {
-                            answer += Convert.ToInt64(adjacentNumbers[0].value) * Convert.ToInt64(adjacentNumbers[1].value);
-                        }
                     }
+
+                    nums.AddRange(numbers.Where(n => n.y == y && (n.x + n.value.ToString().Length == match.Index || n.x == match.Index + 1)));
+
+                    if (y < data.Length)
+                    {
+                        nums.AddRange(numbers.Where(n =>
+                            n.y == y + 1
+                            && n.x + n.value.ToString().Length > match.Index - 1
+                            && n.x <= match.Index + 1));
+                    }
+
+                    if (nums.Count == 2) ans += nums[0].value * nums[1].value;
                 }
                 y++;
             }
-
-            return answer;
+            return ans;
         }
 
         private bool isInBounds(int x, int y)
