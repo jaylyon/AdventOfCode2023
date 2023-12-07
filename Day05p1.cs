@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.AccessControl;
-using System.Text;
-using System.Threading.Tasks;
-using System.Text.RegularExpressions;
-using System.ComponentModel.DataAnnotations;
+﻿using System.Text.RegularExpressions;
 
 namespace AOC2023
 {
     internal class Day05p1
     {
-        private const string bigInput = @"seeds: 487758422 524336848 2531594804 27107767 1343486056 124327551 1117929819 93097070 3305050822 442320425 2324984130 87604424 4216329536 45038934 1482842780 224610898 115202033 371332058 2845474954 192579859
+        private const string input = @"seeds: 487758422 524336848 2531594804 27107767 1343486056 124327551 1117929819 93097070 3305050822 442320425 2324984130 87604424 4216329536 45038934 1482842780 224610898 115202033 371332058 2845474954 192579859
 
 seed-to-soil map:
 152560994 173671324 63296280
@@ -258,62 +251,27 @@ humidity-to-location map:
 0 270324010 44178878
 4095868912 2360586995 99297853
 4033131940 2084505991 3704288";
-        private const string sample = @"seeds: 79 14 55 13
 
-seed-to-soil map:
-50 98 2
-52 50 48
+        private long[]? seeds;
 
-soil-to-fertilizer map:
-0 15 37
-37 52 2
-39 0 15
-
-fertilizer-to-water map:
-49 53 8
-0 11 42
-42 0 7
-57 7 4
-
-water-to-light map:
-88 18 7
-18 25 70
-
-light-to-temperature map:
-45 77 23
-81 45 19
-68 64 13
-
-temperature-to-humidity map:
-0 69 1
-1 0 69
-
-humidity-to-location map:
-60 56 37
-56 93 4";
-        private const string input = bigInput;
-
-        private Int64[] seeds;
-
-        internal Int64 Part1()
+        internal long Part1()
         {
-            seeds = Regex.Match(input, @"seeds: (?<seeds>[\d\n\s]*)").Groups["seeds"].Value.Split(' ').Select(Int64.Parse).ToArray();
+            seeds = Regex.Match(input, @"seeds: (?<seeds>[\d\n\s]*)").Groups["seeds"].Value.Split(' ').Select(long.Parse).ToArray();
             foreach (Match match in Regex.Matches(input, @"(?<name>[\w-]+) map:(?<mappings>[\d\s\n]+)"))
             {
                 Map map = new() { Name = match.Groups["name"].Value };
                 foreach (string line in match.Groups["mappings"].Value.Split(Environment.NewLine).Where(l => !String.IsNullOrEmpty(l)))
                 {
-                    var vals = line.Split(' ').Select(v => Int64.Parse(v)).ToArray();
+                    var vals = line.Split(' ').Select(v => long.Parse(v)).ToArray();
                     map.Mappings.Add(new Mapping() { To = vals[0], From = vals[1], Length = vals[2] });
                 }
                 Maps.Add(map);
             }
 
-            Console.WriteLine($" {Maps.Count} maps and {seeds.Length} seeds");
-            Int64 minLocation = Int64.MaxValue;
+            long minLocation = long.MaxValue;
             foreach (var seed in seeds)
             {
-                Int64 x = seed;
+                long x = seed;
                 foreach (var map in Maps)
                 {
                     x = map.GetMappedValue(x);
@@ -331,7 +289,7 @@ humidity-to-location map:
             public string Name { get; set; }
             public List<Mapping> Mappings { get; set; } = new();
 
-            public Int64 GetMappedValue(Int64 source)
+            public long GetMappedValue(long source)
             {
                 var mapping = Mappings.Where(m => m.From <= source && m.Max > source).FirstOrDefault();
                 if (mapping == default) return source;
@@ -341,9 +299,9 @@ humidity-to-location map:
 
         private class Mapping
         {
-            internal Int64 To { get; set; }
-            internal Int64 From { get; set; }
-            internal Int64 Length { get; set; }
+            internal long To { get; set; }
+            internal long From { get; set; }
+            internal long Length { get; set; }
             
             private long max;
 
