@@ -63,6 +63,13 @@ public class Program
         sw.Restart();
         Console.WriteLine($"    Part 2 = {d8.Part2()} ({sw.Elapsed.TotalMilliseconds} ms)\n");
 
+        var d9 = new Day09();
+        Console.WriteLine("Day 09");
+        sw.Restart();
+        Console.WriteLine($"    Part 1 = {d9.Part1()} ({sw.Elapsed.TotalMilliseconds} ms)");
+        sw.Restart();
+        Console.WriteLine($"    Part 2 = {d9.Part2()} ({sw.Elapsed.TotalMilliseconds} ms)\n");
+
         sw.Stop();
     }
 }
