@@ -1,10 +1,17 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Text.RegularExpressions;
+using System.Runtime.CompilerServices;
+using System.Security.AccessControl;
 
 namespace AOC2023
 {
-    class Day10
+    internal class Day10_fail
     {
-        private const string input = @"777FJ.F|-|FFF-L-J7.7.F-7--L-7-L-LF-7-FFF.FLF7.FL7-J77F-7.L7-7.-F77F|FLJ7.L---7.7---J77F|.F|-J7FFF|7-F7-77.FF7|-7-F77F-.J7.777FF|F|-F77|-77.F
+        private const string bigInput = @"777FJ.F|-|FFF-L-J7.7.F-7--L-7-L-LF-7-FFF.FLF7.FL7-J77F-7.L7-7.-F77F|FLJ7.L---7.7---J77F|.F|-J7FFF|7-F7-77.FF7|-7-F77F-.J7.777FF|F|-F77|-77.F
 L|F|JJ||.FL7L-JFJLJFFJFJJ|FFJFJ-LLJJ.7.F-.LJJFF|L7.F-.LJFLFJ|7|||.|FJ|LJ7J...-J77.L|F|7.--.LLF-FFFL7||7LF-F7-J7JF|77L-|L-L7LFL-F-7JLJ-|.L7.F
 L--JJ|L-.LLJ-L-J||FJJ-JJFF7JFL77.LL-|J7|J.-L-LFJ7|-L.FFJ|7|.L7FFJFJ|LJ-FL.-77|7|F7FLJ|.F-L7|.|JFL-.L|JF|L-L77J7.|JL7F7|7LLJ...||-J-FL-L|JJF|
 FF|-L7.J..-JFJ.L7-|J.FL7F7J.|-7-F7L--F-JL-J|-FJ-||7L|7J-J77F-L-JLFJF7|L|-L-J7-J7.J-J--.|F||-J7-|J|-FJ.FFJ.||JL7-L--L--J-F.LF7LL.--77.F.|||L|
@@ -144,260 +151,364 @@ FLF||LL|7J|J|.FFJL||.FJLJFJ-L-|L-LJLFJ.FL-|7.F7|F|F||.FJ..L|-7-J.F--J|LJ|F-J-FJ|
 |F-77LLL|-J----L|7LJ7L-|-JJ7|F-|.LL77LJ7|.LLF|FLFJ7FL-|L77.|L|LLFL--7L-7|L7.FJF|--LL--F--|F|F--JF.FLJ...||7FFJLJ-77L7J-LF7F7FFF7|F7.J|FLJFF.
 L7L|-7-||L7.||FLJ7FJ7JF7.|.|FL-J7.FL-JF|-7FL|LL-LF|L||.FLJFF7J-7FLF-JF-J|FJFL7||.FJL||J|-JJ.L|.FF-L--L7F|FL---7|F-77FJFL.F7.L|LL-|-FLJ-J-FJ-
 LLF7.J.L7-J-L-|.L|JL|JLL-FL7JLL7.L-JJL-J-LJ.LJL77-|-J-.F-LF-JJ.LJLL--JLLLJ-L-FLF-7...J-J-LJF.L.L7JL|JLLFF7J-LFL--L|-JLJ.--L7.|.LLJL|-J.F-JJ.";
-        private Location start;
-        private List<Location> locations;
-        private Dictionary<Location, int> vectorDictionary = new();
+        private const string sample = @".F----7F7F7F7F-7....
+.|F--7||||||||FJ....
+.||.FJ||||||||L7....
+FJL7L7LJLJ||LJ.L-7..
+L--J.L7...LJS7F-7L7.
+....F-J..F7FJ|L7L7L7
+....L7.F7||L7|.L7L7|
+.....|FJLJ|FJ|F7|.LJ
+....FJL-7.||.||||...
+....L---J.LJ.LJLJ...";
+        private const string input = sample;
 
-        public Day10()
+        public Day10_fail()
         {
-            start = Location.FindChar(input, 'S');
-            locations = Location.Headings.Where(v => GetNext(start + v, v) != Location.Zero).ToList();
+            var lines = input.Split(Environment.NewLine);
+            var chars = lines.Select(l => l.ToArray()).ToArray();
+            sketch = new Location[chars[0].Length, lines.Length];
+            for (int y = 0; y < chars.Length; y++)
+            {
+                for (int x = 0; x < chars[y].Length; x++)
+                {
+                    if (chars[y][x] == 'S')
+                    {
+                        start = new Location(x, y, 'S');
+                        start.Distance = 0;
+                        sketch[x, y] = start;
+                    }
+                    else
+                    {
+                        sketch[x, y] = new Location(x, y, chars[y][x]);
+                    }
+                }
+            }
         }
+
+        private static Location[,] sketch;
+
+        private static Location start;
 
         internal int Part1()
         {
-            return locations.Max(v => MaxDistance(v, vectorDictionary));
+            var l = start;
+            l.Distance = 0;
+            int steps = 0;
+            l.HasBeenVisited[0] = true;
+            while (true)
+            {
+                steps++;
+                l = Move(l, 0, steps);
+                l.HasBeenVisited[0] = true;
+                if (l.Value == 'S')
+                    break;
+                l.Distance = steps;
+            }
+
+            l = start;
+            steps = 0;
+            l.HasBeenVisited[1] = true;
+            while (true)
+            {
+                steps++;
+                l = Move(l, 1, steps);
+                if (l.Value == 'S')
+                    break;
+                l.Distance = steps;
+            }
+
+
+            int maxDistance = 0;
+            for (int y = 0; y < sketch.GetLength(1); y++)
+            {
+                for (int x = 0; x < sketch.GetLength(0); x++)
+                {
+                    if (sketch[x, y].Distance != null)
+                        maxDistance = Math.Max(maxDistance, (int)sketch[x, y].Distance);
+                }
+            }
+
+            return maxDistance;
         }
+
+        private static Dictionary<int, bool> infections = new();
 
         internal int Part2()
         {
-            HashSet<Location> pp = new(vectorDictionary.Keys) { start };
-            return locations.Zip(new[] { Matrix.RotateRight, Matrix.RotateLeft })
-                .Sum(t => CountFill(t.First, t.Second, pp));
-        }
-
-        private int MaxDistance(Location current, Dictionary<Location, int> vectorDictionary)
-        {
-            int d = 0, max = 0;
-            for (Location q = start + current; q != start; q += current = GetNext(q, current))
-                if (!vectorDictionary.TryAdd(q, ++d))
-                    max = Math.Max(max, vectorDictionary[q] = Math.Min(vectorDictionary[q], d));
-            return max;
-        }
-
-        private int CountFill(Location v, Matrix m, HashSet<Location> pp)
-        {
-            int count = 0;
-            for (Location q = start + v; q != start; q += v = GetNext(q, v))
-                count += Location.FloodFill(q + v * m, pp);
-            return count;
-        }
-
-        private static Location GetNext(Location p, Location v)
-        {
-            return Location.GetChar(p, input) switch
+            int answer = 0;
+            for (var y = 0; y < sketch.GetLength(1); y++)
             {
-                '|' when v.x == 0 => v,
-                '-' when v.y == 0 => v,
-                'L' => v.y == 0 ? Location.North : Location.East,
-                'J' => v.y == 0 ? Location.North : Location.West,
-                '7' => v.y == 0 ? Location.South : Location.West,
-                'F' => v.y == 0 ? Location.South : Location.East,
-                _ => Location.Zero,
-            };
+                for (var x = 0; x < sketch.GetLength(0); x++)
+                {
+                    char inOrOut = sketch[x, y].InOrOut;
+                    Console.Write(inOrOut);
+                    if (inOrOut == 'I') answer++;
+                }
+                Console.WriteLine();
+            }
+
+            return answer;
         }
-    }
-
-    public struct Location : IEquatable<Location>
-    {
-        public static readonly Location Zero = default;
-
-        public static readonly Location North = (0, -1);
-        public static readonly Location East = (1, 0);
-        public static readonly Location South = (0, 1);
-        public static readonly Location West = (-1, 0);
-
-        public static readonly Location[] Headings = { North, East, South, West };
-
-        public readonly int x;
-        public readonly int y;
-
-        public Location(int x, int y)
+        private Location Move(Location currentLocation, int round, int steps)
         {
-            this.x = x;
-            this.y = y;
-        }
-
-        public readonly bool Equals(Location other) =>
-            x == other.x &&
-            y == other.y;
-
-        public static Location[] GetNeighbors(Location p) => new Location[]
-        {
-            new(p.x, p.y - 1),
-            new(p.x + 1, p.y),
-            new(p.x, p.y + 1),
-            new(p.x - 1, p.y)
-        };
-
-        public static int FloodFill(Location from, HashSet<Location> pp) =>
-             pp.Add(from)
-                ? 1 + GetNeighbors(from).Sum(q => FloodFill(q, pp))
-                : 0;
-
-        public static Location FindChar(string s, char c, Range range) =>
-            new(s.IndexOf(c) % (range.Width + 1), s.IndexOf(c) / (range.Width + 1));
-
-        public static Location FindChar(string s, char c) =>
-            FindChar(s, c, Range.FromField(s));
-
-        public static char GetChar(Location p, string s, Range range) =>
-            s[p.y * (range.Width + 1) + p.x];
-
-        public static char GetChar(Location p, string s) =>
-            GetChar(p, s, Range.FromField(s));
-
-        public readonly Location Add(Location other) =>
-            new(x + other.x, y + other.y);
-
-        public static Location operator +(Location left, Location right) =>
-            left.Add(right);
-
-        public readonly Location Mul(Matrix m) =>
-            new(x * m.m11 + y * m.m21 + m.m31, x * m.m12 + y * m.m22 + m.m32);
-
-        public static Location operator *(Location vector, Matrix matrix) =>
-            vector.Mul(matrix);
-
-        public static Location Min(Location left, Location right) =>
-            new(Math.Min(left.x, right.x), Math.Min(left.y, right.y));
-
-        public static Location Max(Location left, Location right) =>
-            new(Math.Max(left.x, right.x), Math.Max(left.y, right.y));
-
-        public static implicit operator (int x, int y)(Location value) =>
-            (value.x, value.y);
-
-        public static implicit operator Location((int x, int y) value) =>
-            new(value.x, value.y);
-
-        public static bool operator ==(Location left, Location right) =>
-            left.Equals(right);
-
-        public static bool operator !=(Location left, Location right) =>
-            !left.Equals(right);
-
-    }
-
-    public struct Range : IEquatable<Range>, IEnumerable<Location>
-    {
-        public Range(Location min, Location max)
-        {
-            Min = min;
-            Max = max;
+            if (currentLocation.Y > 0 && currentLocation.Connections.Contains('N')) // check north
+            {
+                var l = sketch[currentLocation.X, currentLocation.Y - 1];
+                if (l.Connections.Contains('S') && l.HasBeenVisited[round] == false && (round == 0 || l.Distance > steps))
+                    return l;
+            }
+            if (currentLocation.X < sketch.GetLength(0) && currentLocation.Connections.Contains('E')) // check east
+            {
+                var l = sketch[currentLocation.X + 1, currentLocation.Y];
+                if (l.Connections.Contains('W') && l.HasBeenVisited[round] == false && (round == 0 || l.Distance > steps))
+                    return l;
+            }
+            if (currentLocation.Y < sketch.GetLength(1) && currentLocation.Connections.Contains('S')) // check south
+            {
+                var l = sketch[currentLocation.X, currentLocation.Y + 1];
+                if (l.Connections.Contains('N') && l.HasBeenVisited[round] == false && (round == 0 || l.Distance > steps))
+                    return l;
+            }
+            if (currentLocation.X > 0 && currentLocation.Connections.Contains('W')) // check west
+            {
+                var l = sketch[currentLocation.X - 1, currentLocation.Y];
+                if (l.Connections.Contains('E') && l.HasBeenVisited[round] == false && (round == 0 || l.Distance > steps))
+                    return sketch[currentLocation.X - 1, currentLocation.Y];
+            }
+            return start;
         }
 
-        public Range(Location max)
-            : this(Location.Zero, max)
+        private class Location : IEquatable<Location>
         {
+            public int X { get; set; }
+            public int Y { get; set; }
+            public char Value { get; set; }
+            public int? Distance { get; set; } = null;
+
+            public bool[] HasBeenVisited { get; set; } = { false, false };
+
+            public char InOrOut
+            {
+                get
+                {
+                    if (Distance != null) return Value;
+                    if (X == 0 || X == sketch.GetLength(0) - 1 || Y == 0 || Y == sketch.GetLength(1)) return 'O';
+
+                    List<int> pipeCrossings = new();
+                    int n;
+                    // Check North
+                    n = 0;
+
+                    char lastEntrance = ' ';
+                    int rights = 0;
+                    int lefts = 0;
+                    for (var i = 1; i <= Y; i++)
+                    {
+                        var p = sketch[X, Y - i];
+                        if (p.Distance == null) continue;
+                        if (p.Distance != null && p.Value == '-') { n++; }
+                        if (p.Value == 'L' || p.Value == 'F')
+                        {
+                            rights++;
+                            //if (lastEntrance == '7' || lastEntrance == 'J')
+                            //{
+                            //    n++;
+                            //    lastEntrance = ' ';
+                            //}
+                            //else
+                            //    lastEntrance = p.Value;
+                        }
+                        if (p.Value == '7' || p.Value == 'J')
+                        {
+                            lefts++;
+                            //if (lastEntrance == 'L' || lastEntrance == 'F')
+                            //{
+                            //    n++;
+                            //    lastEntrance = ' ';
+                            //}
+                            //else
+                            //    lastEntrance = p.Value;
+                        }
+                    }
+                    n += Math.Abs(rights - lefts) / 2;
+                    pipeCrossings.Add(n);
+                    if (n == 0) return 'O';
+
+                    // Check South
+                    n = 0;
+                    rights = lefts = 0;
+                    for (var i = 1; i < sketch.GetLength(1) - Y; i++)
+                    {
+                        var p = sketch[X, Y + i];
+                        if (p.Distance == null) continue;
+                        if (p.Distance != null && p.Value == '-') { n++; }
+                        if (p.Value == 'L' || p.Value == 'F')
+                        {
+                            rights++;
+                            //if (lastEntrance == '7' || lastEntrance == 'J')
+                            //{
+                            //    n++;
+                            //    lastEntrance = ' ';
+                            //}
+                            //else
+                            //    lastEntrance = p.Value;
+                        }
+                        if (p.Value == '7' || p.Value == 'J')
+                        {
+                            lefts++;
+                            //if (lastEntrance == 'L' || lastEntrance == 'F')
+                            //{
+                            //    n++;
+                            //    lastEntrance = ' ';
+                            //}
+                            //else
+                            //    lastEntrance = p.Value;
+                        }
+                    }
+                    n += Math.Abs(rights - lefts) / 2;
+                    pipeCrossings.Add(n);
+                    if (n == 0) return 'O';
+
+                    // Check East
+                    n = 0;
+                    rights = lefts = 0;
+                    for (var i = 1; i < sketch.GetLength(0) - X; i++)
+                    {
+                        var p = sketch[X + i, Y];
+                        if (p.Distance == null) continue;
+                        if (p.Distance != null && p.Value == '|') { n++; }
+                        if (p.Value == 'L' || p.Value == 'F')
+                        {
+                            rights++;
+                            //if (lastEntrance == '7' || lastEntrance == 'J')
+                            //{
+                            //    n++;
+                            //    lastEntrance = ' ';
+                            //}
+                            //else
+                            //    lastEntrance = p.Value;
+                        }
+                        if (p.Value == '7' || p.Value == 'J')
+                        {
+                            lefts++;
+                            //if (lastEntrance == 'L' || lastEntrance == 'F')
+                            //{
+                            //    n++;
+                            //    lastEntrance = ' ';
+                            //}
+                            //else
+                            //    lastEntrance = p.Value;
+                        }
+                    }
+                    n += Math.Abs(rights - lefts) / 2;
+                    pipeCrossings.Add(n);
+                    if (n == 0) return 'O';
+
+                    // Check West
+                    n = 0;
+                    rights = lefts = 0;
+                    for (var i = 0; i <= X; i++)
+                    {
+                        var p = sketch[X - i, Y];
+                        if (p.Distance == null) continue;
+                        if (p.Distance != null && p.Value == '|') { n++; }
+                        if (p.Value == 'L' || p.Value == 'F')
+                        {
+                            rights++;
+                            //if (lastEntrance == '7' || lastEntrance == 'J')
+                            //{
+                            //    n++;
+                            //    lastEntrance = ' ';
+                            //}
+                            //else
+                            //    lastEntrance = p.Value;
+                        }
+                        if (p.Value == '7' || p.Value == 'J')
+                        {
+                            lefts++;
+                            //if (lastEntrance == 'L' || lastEntrance == 'F')
+                            //{
+                            //    n++;
+                            //    lastEntrance = ' ';
+                            //}
+                            //else
+                            //    lastEntrance = p.Value;
+                        }
+                    }
+                    n += Math.Abs(rights - lefts) / 2;
+                    pipeCrossings.Add(n);
+                    if (n == 0) return 'O';
+
+                    foreach (var p in pipeCrossings)
+                    {
+                        if (p % 2 != 0) return 'I';
+                    }
+                    return 'O';
+
+
+                    //int numberOfEvens = pipeCrossings.Count(p => p % 2 == 0 || p == 0);
+                    ////Console.WriteLine($"  Evens = {numberOfEvens}");
+                    //if (numberOfEvens == 1 || numberOfEvens == 2 || numberOfEvens == 0 || numberOfEvens == 3 || numberOfEvens == 4) 
+                    //    return 'I';
+                    //else if (numberOfEvens == 3)
+                    //{
+                    //    var groups = pipeCrossings.Where(p => p % 2 == 0).GroupBy(p=>p);
+                    //    if (groups.Count() == 1)
+                    //        return '0';
+                    //    return 'I';
+                    //}
+
+                    return 'O';
+                }
+            }
+
+            public Location(int x, int y, char value)
+            {
+                X = x; Y = y; Value = value;
+                switch (value)
+                {
+                    case '|':
+                        Connections = new HashSet<char> { 'N', 'S' };
+                        break;
+                    case '-':
+                        Connections = new HashSet<char> { 'E', 'W' };
+                        break;
+                    case 'L':
+                        Connections = new HashSet<char> { 'N', 'E' };
+                        break;
+                    case 'J':
+                        Connections = new HashSet<char> { 'N', 'W' };
+                        break;
+                    case '7':
+                        Connections = new HashSet<char> { 'S', 'W' };
+                        break;
+                    case 'F':
+                        Connections = new HashSet<char> { 'S', 'E' };
+                        break;
+                    case '.':
+                        break;
+                    case 'S':
+                        Connections = new HashSet<char> { 'N', 'S', 'E', 'W' };
+                        break;
+                    default:
+                        throw new ArgumentException("shizzle");
+
+                }
+            }
+
+            public HashSet<char> Connections { get; private set; } = new();
+
+            public override string ToString()
+            {
+                return ($"({X}, {Y}) = {Value} Distance = {Distance}");
+            }
+
+            public bool Equals(Location? other)
+            {
+                return other.X == X && other.Y == Y;
+            }
         }
-
-        public Range(int x, int y)
-            : this(new(x, y))
-        {
-        }
-
-        public Location Min { get; }
-        public Location Max { get; }
-
-        public int Width => Max.x - Min.x + 1;
-        public int Height => Max.y - Min.y + 1;
-
-        public readonly override bool Equals(object obj) =>
-            obj is Range other && Equals(other);
-
-        public readonly bool Equals(Range other) =>
-            Min.Equals(other.Min) &&
-            Max.Equals(other.Max);
-
-        public readonly override int GetHashCode() =>
-            HashCode.Combine(Min, Max);
-
-        public readonly IEnumerator<Location> GetEnumerator()
-        {
-            for (var y = Min.y; y <= Max.y; y++)
-                for (var x = Min.x; x <= Max.x; x++)
-                    yield return new(x, y);
-        }
-
-        readonly IEnumerator IEnumerable.GetEnumerator() =>
-            GetEnumerator();
-
-        public readonly bool IsMatch(Location vector) =>
-            vector.x >= Min.x && vector.x <= Max.x &&
-            vector.y >= Min.y && vector.y <= Max.y;
-
-
-        public readonly Range Intersect(Range other) =>
-            new(min: Location.Max(Min, other.Min), max: Location.Min(Max, other.Max));
-
-
-        public static Range FromField(string s) =>
-            new(GetWidth(s) - 1, GetHeight(s) - 1);
-
-        private static int GetWidth(string s) =>
-            s.IndexOf('\n');
-
-        private static int GetHeight(string s) =>
-            (s.Length + 1) / GetWidth(s);
-
-        public static implicit operator (Location min, Location max)(Range value) =>
-            (value.Min, value.Max);
-
-        public static implicit operator Range((Location min, Location max) value) =>
-            new(value.min, value.max);
-
-        public static bool operator ==(Range left, Range right) =>
-            left.Equals(right);
-
-        public static bool operator !=(Range left, Range right) =>
-            !left.Equals(right);
-    }
-
-    public struct Matrix
-    {
-        public static readonly Matrix Zero = default;
-        public static readonly Matrix Identity = new(1, 0, 0, 1);
-        public static readonly Matrix RotateRight = new(0, 1, -1, 0);
-        public static readonly Matrix RotateLeft = new(0, -1, 1, 0);
-        public static readonly Matrix MirrorHorizontal = new(1, 0, 0, -1);
-        public static readonly Matrix MirrorVertical = new(-1, 0, 0, 1);
-        public static readonly Matrix Flip = new(-1, 0, 0, -1);
-
-        public readonly int m11;
-        public readonly int m12;
-        public readonly int m21;
-        public readonly int m22;
-        public readonly int m31;
-        public readonly int m32;
-
-        public Matrix(int m11, int m12, int m21, int m22, int m31 = 0, int m32 = 0)
-        {
-            this.m11 = m11;
-            this.m12 = m12;
-            this.m21 = m21;
-            this.m22 = m22;
-            this.m31 = m31;
-            this.m32 = m32;
-        }
-
-        public Matrix(int m)
-        {
-            m11 = (m & 3) - 1;
-            m12 = ((m >> 2) & 3) - 1;
-            m21 = ((m >> 4) & 3) - 1;
-            m22 = ((m >> 6) & 3) - 1;
-            m31 = m32 = 0;
-        }
-
-        public static implicit operator Matrix((int m11, int m12, int m21, int m22) m) =>
-            new(m.m11, m.m12, m.m21, m.m22);
-
-        public static implicit operator Matrix((int m11, int m12, int m21, int m22, int m31, int m32) m) =>
-            new(m.m11, m.m12, m.m21, m.m22, m.m31, m.m32);
-
-        public static explicit operator Matrix(int m) =>
-            new(m);
 
     }
 }

@@ -70,6 +70,27 @@ public class Program
         sw.Restart();
         Console.WriteLine($"    Part 2 = {d9.Part2()} ({sw.Elapsed.TotalMilliseconds} ms)\n");
 
+        var d10 = new Day10();
+        Console.WriteLine("Day 10");
+        sw.Restart();
+        Console.WriteLine($"    Part 1 = {d10.Part1()} ({sw.Elapsed.TotalMilliseconds} ms)");
+        sw.Restart();
+        Console.WriteLine($"    Part 2 = {d10.Part2()} ({sw.Elapsed.TotalMilliseconds} ms)\n");
+
+        var d11 = new Day11();
+        Console.WriteLine("Day 11");
+        sw.Restart();
+        Console.WriteLine($"    Part 1 = {d11.Part1()} ({sw.Elapsed.TotalMilliseconds} ms)");
+        sw.Restart();
+        Console.WriteLine($"    Part 2 = {d11.Part2()} ({sw.Elapsed.TotalMilliseconds} ms)\n");
+
+        var d12 = new Day12();
+        Console.WriteLine("Day 12");
+        sw.Restart();
+        Console.WriteLine($"    Part 1 = {d12.Part1()} ({sw.Elapsed.TotalMilliseconds} ms)");
+        sw.Restart();
+        Console.WriteLine($"    Part 2 = {d12.Part2()} ({sw.Elapsed.TotalMilliseconds} ms)\n");
+
         sw.Stop();
     }
 }
