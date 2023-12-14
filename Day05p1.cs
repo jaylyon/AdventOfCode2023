@@ -259,10 +259,10 @@ humidity-to-location map:
             seeds = Regex.Match(input, @"seeds: (?<seeds>[\d\n\s]*)").Groups["seeds"].Value.Split(' ').Select(long.Parse).ToArray();
             foreach (Match match in Regex.Matches(input, @"(?<name>[\w-]+) map:(?<mappings>[\d\s\n]+)"))
             {
-                Map map = new() { Name = match.Groups["name"].Value };
+                Map map = new() { };
                 foreach (string line in match.Groups["mappings"].Value.Split(Environment.NewLine).Where(l => !String.IsNullOrEmpty(l)))
                 {
-                    var vals = line.Split(' ').Select(v => long.Parse(v)).ToArray();
+                    var vals = line.Split(' ').Select(long.Parse).ToArray();
                     map.Mappings.Add(new Mapping() { To = vals[0], From = vals[1], Length = vals[2] });
                 }
                 Maps.Add(map);
@@ -286,12 +286,11 @@ humidity-to-location map:
 
         private class Map
         {
-            public string Name { get; set; }
-            public List<Mapping> Mappings { get; set; } = new();
+            public List<Mapping> Mappings { get; } = new();
 
             public long GetMappedValue(long source)
             {
-                var mapping = Mappings.Where(m => m.From <= source && m.Max > source).FirstOrDefault();
+                var mapping = Mappings.FirstOrDefault(m => m.From <= source && m.Max > source);
                 if (mapping == default) return source;
                 return mapping.To + source - mapping.From;
             }
@@ -299,9 +298,9 @@ humidity-to-location map:
 
         private class Mapping
         {
-            internal long To { get; set; }
-            internal long From { get; set; }
-            internal long Length { get; set; }
+            internal long To { get; init; }
+            internal long From { get; init; }
+            internal long Length { get; init; }
             
             private long max;
 

@@ -140,7 +140,7 @@ Game 100: 12 blue, 2 green; 2 green, 4 red, 13 blue; 9 blue, 1 red, 2 green; 2 g
         private record Game
         {
             internal int Id { get; init; }
-            internal List<Play> Plays { get; set; } = new();
+            internal List<Play> Plays { get; } = new();
             internal int Power { get { return Plays.Max(p => p.Red) * Plays.Max(p => p.Green) * Plays.Max(p => p.Blue); }}
         }
 

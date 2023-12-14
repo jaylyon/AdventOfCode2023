@@ -305,7 +305,7 @@ humidity-to-location map:
                 .Select(match => new SeedRange()
                 {
                     From = long.Parse(match.Groups["location"].Value),
-                    To = long.Parse(match.Groups["location"].Value) + long.Parse(match.Groups["length"].Value) - 1l
+                    To = long.Parse(match.Groups["location"].Value) + long.Parse(match.Groups["length"].Value) - 1L
                 }).ToList();
 
             // Thanks to my friend Thomas for this little bit of wizardry
@@ -361,7 +361,7 @@ humidity-to-location map:
 
             internal Mapping(string line)
             {
-                var numbers = line.Split(' ').Select(v => Int64.Parse(v)).ToArray();
+                var numbers = line.Split(' ').Select(Int64.Parse).ToArray();
                 From = numbers[1];
                 To = numbers[1] + numbers[2] - 1;
                 Length = numbers[2];

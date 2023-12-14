@@ -1,6 +1,4 @@
-﻿using System.Net;
-
-namespace AOC2023
+﻿namespace AOC2023
 {
     internal class Day11
     {
@@ -33,7 +31,7 @@ namespace AOC2023
             char[,] image = new char[lines[0].Length,lines.Count];
             for (int y = 0; y < image.GetLength(1); y++)
             {
-                var chars = lines[y].ToArray<char>();
+                var chars = lines[y].ToArray();
                 for (int x = 0; x < chars.Length; x++)
                 {
                     image[x, y] = chars[x];
@@ -100,9 +98,9 @@ namespace AOC2023
 
         private class Galaxy : IComparable<Galaxy>
         {
-            public int Id { get; set; }
-            public int X { get; set; }
-            public int Y { get; set; }
+            public int Id { get; init; }
+            public int X { get; init; }
+            public int Y { get; init; }
 
             public int CompareTo(Galaxy? other)
             {

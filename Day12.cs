@@ -8,7 +8,7 @@ namespace AOC2023
         // Immutable collections used for DTOs - remember that's important
         // Memoized recursion is a thing
 
-        private readonly string input = File.ReadAllText(@"Input/12.txt");
+        private readonly string input = File.ReadAllText("Input/12.txt");
 
         internal long Part1()
         {

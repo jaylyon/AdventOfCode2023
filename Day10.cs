@@ -140,7 +140,7 @@ namespace AOC2023
 
     }
 
-    public struct Range : IEquatable<Range>, IEnumerable<Location>
+    public readonly struct Range : IEquatable<Range>, IEnumerable<Location>
     {
         public Range(Location min, Location max)
         {
@@ -162,7 +162,6 @@ namespace AOC2023
         public Location Max { get; }
 
         public int Width => Max.x - Min.x + 1;
-        public int Height => Max.y - Min.y + 1;
 
         public readonly override bool Equals(object obj) =>
             obj is Range other && Equals(other);
@@ -183,15 +182,6 @@ namespace AOC2023
 
         readonly IEnumerator IEnumerable.GetEnumerator() =>
             GetEnumerator();
-
-        public readonly bool IsMatch(Location vector) =>
-            vector.x >= Min.x && vector.x <= Max.x &&
-            vector.y >= Min.y && vector.y <= Max.y;
-
-
-        public readonly Range Intersect(Range other) =>
-            new(min: Location.Max(Min, other.Min), max: Location.Min(Max, other.Max));
-
 
         public static Range FromField(string s) =>
             new(GetWidth(s) - 1, GetHeight(s) - 1);
@@ -217,13 +207,8 @@ namespace AOC2023
 
     public struct Matrix
     {
-        public static readonly Matrix Zero = default;
-        public static readonly Matrix Identity = new(1, 0, 0, 1);
         public static readonly Matrix RotateRight = new(0, 1, -1, 0);
         public static readonly Matrix RotateLeft = new(0, -1, 1, 0);
-        public static readonly Matrix MirrorHorizontal = new(1, 0, 0, -1);
-        public static readonly Matrix MirrorVertical = new(-1, 0, 0, 1);
-        public static readonly Matrix Flip = new(-1, 0, 0, -1);
 
         public readonly int m11;
         public readonly int m12;
