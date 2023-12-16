@@ -160,6 +160,16 @@ public class Program
             Console.WriteLine($"    Part 2 = {d15.Part2()} ({sw.Elapsed.TotalMilliseconds} ms)\n");
         }
 
+        if (today == 16)
+        {
+            var d16 = new Day16();
+            Console.WriteLine("Day 16");
+            sw.Restart();
+            Console.WriteLine($"    Part 1 = {d16.Part1()} ({sw.Elapsed.TotalMilliseconds} ms)");
+            sw.Restart();
+            Console.WriteLine($"    Part 2 = {d16.Part2()} ({sw.Elapsed.TotalMilliseconds} ms)\n");
+        }
+
         sw.Stop();
     }
 }
