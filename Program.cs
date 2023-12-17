@@ -170,6 +170,16 @@ public class Program
             Console.WriteLine($"    Part 2 = {d16.Part2()} ({sw.Elapsed.TotalMilliseconds} ms)\n");
         }
 
+        if (today == 17)
+        {
+            var d17 = new Day17();
+            Console.WriteLine("Day 17");
+            sw.Restart();
+            Console.WriteLine($"    Part 1 = {d17.Part1()} ({sw.Elapsed.TotalMilliseconds} ms)");
+            sw.Restart();
+            Console.WriteLine($"    Part 2 = {d17.Part2()} ({sw.Elapsed.TotalMilliseconds} ms)\n");
+        }
+
         sw.Stop();
     }
 }
