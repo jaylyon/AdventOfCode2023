@@ -42,7 +42,7 @@ namespace AOC2023
 
             while (q.TryDequeue(out var cursor, out var heatLoss))
             {
-                if (cursor.Position == end && rules.CanTurn(cursor)) return heatLoss;
+                if (cursor.Position == end && rules.CanTurn(cursor)) return heatLoss; //little bit of a misnomer. CanTurn means the minimum straight moves have been fulfilled
 
                 foreach (var possibleCursor in PossibleCursors(cursor, rules))
                 {

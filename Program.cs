@@ -172,12 +172,22 @@ public class Program
 
         if (today == 17)
         {
-            var d17 = new Day17();
+            var d = new Day17();
             Console.WriteLine("Day 17");
             sw.Restart();
-            Console.WriteLine($"    Part 1 = {d17.Part1()} ({sw.Elapsed.TotalMilliseconds} ms)");
+            Console.WriteLine($"    Part 1 = {d.Part1()} ({sw.Elapsed.TotalMilliseconds} ms)");
             sw.Restart();
-            Console.WriteLine($"    Part 2 = {d17.Part2()} ({sw.Elapsed.TotalMilliseconds} ms)\n");
+            Console.WriteLine($"    Part 2 = {d.Part2()} ({sw.Elapsed.TotalMilliseconds} ms)\n");
+        }
+
+        if (today == 18)
+        {
+            var d = new Day18();
+            Console.WriteLine("Day 18");
+            sw.Restart();
+            Console.WriteLine($"    Part 1 = {d.Part1()} ({sw.Elapsed.TotalMilliseconds} ms)");
+            sw.Restart();
+            Console.WriteLine($"    Part 2 = {d.Part2()} ({sw.Elapsed.TotalMilliseconds} ms)\n");
         }
 
         sw.Stop();
